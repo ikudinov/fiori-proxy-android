@@ -104,6 +104,7 @@ SmartAppInterceptor.prototype._sendMessageToAndroid = function ({
         totalMessageCount: 1,
         messageNumber: 0,
       },
+      type: 'fiori',
       ref,
     })
   );
