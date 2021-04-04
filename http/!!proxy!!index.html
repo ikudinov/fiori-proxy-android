@@ -1,0 +1,31 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Express</title>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <iframe id="iframe" style="width: 100%; height: 100vh; border: 0"></iframe>
+
+  <script src="!!proxy!!base64.js"></script>
+  <script src="!!proxy!!interceptor.js"></script>
+  <script>
+    const smartAppInterceptor = new SmartAppInterceptor({
+      iframeSelector: '#iframe',
+      smartAppUrl: '/sap/bc/ui5_ui5/sap/zhcm_fss_0610/sync.html?View=My&sap-client=100',
+    });
+  </script>
+</body>
+
+</html>
