@@ -4,7 +4,7 @@ function SmartAppInterceptor({ iframeSelector, smartAppUrl }) {
   this._iframe = document.querySelector(iframeSelector);
   this._smartAppUrl = smartAppUrl;
   this._serviceWorker = null;
-  this._cookies = JSON.parse(localStorage.getItem('_fiori_cookie_') || '{}')
+  this._cookies = {};
   this._messagesCache = {};
 
   window.handleAndroidEvent = this._handleAndroidEvent.bind(this);
@@ -237,8 +237,6 @@ SmartAppInterceptor.prototype._processCookies = function (data) {
     },
     {}
   );
-
-  localStorage.setItem('_fiori_cookie_', JSON.stringify(this._cookies))
 
   return responseHeaders;
 };
