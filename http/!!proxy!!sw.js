@@ -33,10 +33,30 @@ function fetchInterceptor(event) {
   const needToLoadImmediately = /https?:\/\/[^/]+\/\!\!proxy\!\!/.test(
     event.request.url
   );
+  const needToUseCache = /\.(js|css|woff|woff2)[?]*/i.test(event.request.url);
 
   if (needToLoadImmediately) return fetch(event.request);
 
-  return loadDataThroughParent(event.request, event.resultingClientId);
+  if (!needToUseCache) {
+    return loadDataThroughParent(event.request, event.resultingClientId);
+  }
+
+  return caches.open("_fiori_").then(cache =>
+    cache.match(event.request).then(response => {
+      if (DEBUG) {
+        console.log('[sw] appcache', needToUseCache, event.request.url, !!response);
+      }
+
+      return (
+        response ||
+        loadDataThroughParent(event.request, event.resultingClientId)
+          .then(response => {
+            cache.put(event.request, response.clone());
+            return response;
+          })
+      )
+    })
+  );
 }
 
 function loadDataThroughParent(request, id) {
@@ -84,9 +104,9 @@ function sendMessageToParent(message, waitResponse, id) {
         return Promise.reject("Client not found for postMessage");
 
       clients.map((client) => {
-        if (client.id === id || client.type !== 'window') {
+        if (client.id === id || client.type !== "window") {
           if (DEBUG) console.log("[send::sw] skip client", client);
-          return
+          return;
         }
 
         if (DEBUG) console.log("[send::sw]", message, client);
