@@ -148,19 +148,19 @@ SmartAppInterceptor.prototype._checkAllMsgsRecieved = function (array, count) {
   return true;
 };
 
-SmartAppInterceptor.prototype._handleAndroidEvent = async function (
-  responseText
-) {
+SmartAppInterceptor.prototype._handleAndroidEvent = async function (response) {
   try {
-    const response = JSON.parse(responseText);
     const {
+      data: {
+        headers,
+        body,
+        status,
+        message_number: messageNumber,
+        total_message_count: totalMessageCount,
+      },
       ref,
-      headers,
-      body,
-      status,
-      message_number: messageNumber,
-      total_message_count: totalMessageCount,
-    } = response.data;
+    } = response;
+    const data = { ...response.data, ref };
 
     const cache = this._messagesCache[ref];
     const url = cache && cache.url;
