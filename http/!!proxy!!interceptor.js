@@ -31,7 +31,7 @@ SmartAppInterceptor.prototype._handleMessage = function (event) {
       this.log("iframe => smartapp", message);
 
       if (messageId && !this._messagesCache[messageId]) {
-        this.log('cache:add', messageId);
+        this.log("cache:add", messageId);
         this._messagesCache[messageId] = { url, messages: [] };
       }
 
@@ -75,7 +75,7 @@ SmartAppInterceptor.prototype._sendMessageToAndroid = function ({
       .join("; "),
   };
 
-  this.log('cookie', requestHeaders.cookie)
+  this.log("cookie", requestHeaders.cookie);
 
   const requestHeadersList = Object.entries(
     requestHeaders
@@ -91,7 +91,9 @@ SmartAppInterceptor.prototype._sendMessageToAndroid = function ({
     return;
   }
   if (!express.handleSmartAppEvent) {
-    this.log('No method "express.handleSmartAppEvent", cannot send message to Android');
+    this.log(
+      'No method "express.handleSmartAppEvent", cannot send message to Android'
+    );
   }
 
   express.handleSmartAppEvent(
@@ -101,10 +103,10 @@ SmartAppInterceptor.prototype._sendMessageToAndroid = function ({
         method,
         body: body && base64.encode(body),
         headers: requestHeadersList,
-        totalMessageCount: 1,
-        messageNumber: 0,
+        total_message_count: 1,
+        message_number: 0,
       },
-      type: 'fiori',
+      type: "fiori",
       ref,
     })
   );
@@ -130,7 +132,7 @@ SmartAppInterceptor.prototype._caclulateBody = async function (cache, data) {
   }, null);
 
   const injectedBody = cache.url
-    ? body && await this._injectScript(cache.url, body)
+    ? body && (await this._injectScript(cache.url, body))
     : body;
 
   return injectedBody;
@@ -146,20 +148,32 @@ SmartAppInterceptor.prototype._checkAllMsgsRecieved = function (array, count) {
   return true;
 };
 
-SmartAppInterceptor.prototype._handleAndroidEvent = async function (responseText) {
+SmartAppInterceptor.prototype._handleAndroidEvent = async function (
+  responseText
+) {
   try {
     const response = JSON.parse(responseText);
-    const { ref, headers, body, status, messageNumber, totalMessageCount } = response.data;
-  
+    const {
+      ref,
+      headers,
+      body,
+      status,
+      message_number: messageNumber,
+      total_message_count: totalMessageCount,
+    } = response.data;
+
     const cache = this._messagesCache[ref];
     const url = cache && cache.url;
-  
+
     this.log("smartapp => iframe", ref);
-  
+
     const headersMap = this._processCookies.call(this, data);
     cache.messages[messageNumber] = data;
-    
-    const isAllMessagesReceived = this._checkAllMsgsRecieved(cache.messages, totalMessageCount)
+
+    const isAllMessagesReceived = this._checkAllMsgsRecieved(
+      cache.messages,
+      totalMessageCount
+    );
 
     this.log("msgs recvd", ref, isAllMessagesReceived);
 
@@ -167,20 +181,20 @@ SmartAppInterceptor.prototype._handleAndroidEvent = async function (responseText
     if (!isAllMessagesReceived) {
       return;
     }
-  
+
     const calculatedBody = await this._caclulateBody(cache, data);
 
-    this.log('cache:remove', ref);
+    this.log("cache:remove", ref);
     delete this._messagesCache[ref];
-  
+
     this._sendMessageToSW({
       status,
       headers: headersMap,
       body: calculatedBody,
       messageId: ref,
     });
-  } catch(e) {
-    console.log('ERROR!!!', data, this._messagesCache, e)
+  } catch (e) {
+    console.log("ERROR!!!", data, this._messagesCache, e);
   }
 };
 
