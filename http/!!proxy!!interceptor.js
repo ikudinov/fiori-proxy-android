@@ -1,4 +1,4 @@
-const SMARTAPP_HOST = "https://fiori-proxy-web.herokuapp.com";
+const SMARTAPP_HOST = "https://fiori-proxy-android.herokuapp.com";
 
 function SmartAppInterceptor({ iframeSelector, smartAppUrl }) {
   this._iframe = document.querySelector(iframeSelector);
