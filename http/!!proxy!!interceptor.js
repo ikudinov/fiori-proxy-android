@@ -90,11 +90,11 @@ SmartAppInterceptor.prototype._sendMessageToAndroid = function ({
     this.log('No object "express", cannot send message to Android');
     return;
   }
-  if (!express.send) {
-    this.log('No method "express.send", cannot send message to Android');
+  if (!express.handleSmartAppEvent) {
+    this.log('No method "express.handleSmartAppEvent", cannot send message to Android');
   }
 
-  express.send(
+  express.handleSmartAppEvent(
     JSON.stringify({
       data: {
         url: proxiedUrl,
