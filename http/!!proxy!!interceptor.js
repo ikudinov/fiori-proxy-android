@@ -149,7 +149,11 @@ SmartAppInterceptor.prototype._checkAllMsgsRecieved = function (array, count) {
 };
 
 SmartAppInterceptor.prototype._handleAndroidEvent = async function (response) {
-  try {
+  // try {
+    if (!response || !response.data) {
+      this.log("Error in event", JSON.stringify(response));
+    }
+    
     const {
       data: {
         headers,
@@ -158,16 +162,25 @@ SmartAppInterceptor.prototype._handleAndroidEvent = async function (response) {
         message_number: messageNumber,
         total_message_count: totalMessageCount,
       },
-      ref,
+      ref
     } = response;
-    const data = { ...response.data, ref };
+    if (response.data.ref) {
+      delete response.data.ref;
+    }
+    const data = response.data;
 
-    const cache = this._messagesCache[ref];
+    let cache = this._messagesCache[ref];
     const url = cache && cache.url;
 
     this.log("smartapp => iframe", ref);
 
     const headersMap = this._processCookies.call(this, data);
+
+    if (!cache || !cache.messages) {
+      this.log(`Uncaught: no cache for ref ${ref}`);
+      cache = this._messagesCache[ref] = { url, messages: [] };
+    }
+
     cache.messages[messageNumber] = data;
 
     const isAllMessagesReceived = this._checkAllMsgsRecieved(
@@ -193,9 +206,9 @@ SmartAppInterceptor.prototype._handleAndroidEvent = async function (response) {
       body: calculatedBody,
       messageId: ref,
     });
-  } catch (e) {
-    console.log("ERROR!!!", data, this._messagesCache, e);
-  }
+  // } catch (e) {
+  //   console.log("ERROR!!!", data, this._messagesCache, e);
+  // }
 };
 
 SmartAppInterceptor.prototype.dispose = function () {
